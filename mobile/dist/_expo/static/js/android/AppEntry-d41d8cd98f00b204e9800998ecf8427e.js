@@ -106569,15 +106569,18 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
   var _asyncToGenerator = _interopDefault(_babelRuntimeHelpersAsyncToGenerator);
   var _babelRuntimeHelpersSlicedToArray = require(_dependencyMap[1], "@babel/runtime/helpers/slicedToArray");
   var _slicedToArray = _interopDefault(_babelRuntimeHelpersSlicedToArray);
-  var _expoStatusBar = require(_dependencyMap[2], "expo-status-bar");
-  var _expoConstants = require(_dependencyMap[3], "expo-constants");
+  var _expoVirtualEnv = require(_dependencyMap[2], "expo/virtual/env");
+  var _expoStatusBar = require(_dependencyMap[3], "expo-status-bar");
+  var _expoConstants = require(_dependencyMap[4], "expo-constants");
   var Constants = _interopDefault(_expoConstants);
-  var _react = require(_dependencyMap[4], "react");
-  var _reactNative = require(_dependencyMap[5], "react-native");
-  var _reactJsxDevRuntime = require(_dependencyMap[6], "react/jsx-dev-runtime");
-  var FALLBACK_API_BASE = "http://localhost:5000";
+  var _react = require(_dependencyMap[5], "react");
+  var _reactNative = require(_dependencyMap[6], "react-native");
+  var _reactJsxDevRuntime = require(_dependencyMap[7], "react/jsx-dev-runtime");
   var RUPEE = "\u20b9";
-  function getApiBase() {
+  var FALLBACK_API_BASE = "http://localhost:5000";
+  function resolveApiBase() {
+    var fromEnv = _expoVirtualEnv.env.EXPO_PUBLIC_API_BASE;
+    if (fromEnv) return fromEnv;
     var hostUri = Constants.default.expoConfig?.hostUri;
     if (!hostUri) return FALLBACK_API_BASE;
     var host = hostUri.split(":")[0];
@@ -106587,320 +106590,577 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
     }
     return `http://${host}:5000`;
   }
-  var API_BASE = getApiBase();
+  var API_BASE = resolveApiBase();
+  var EMPTY_TOTALS = {
+    subtotal: 0,
+    gst: 0,
+    platformFee: 0,
+    total: 0
+  };
   function App() {
     _s();
-    var _useState = (0, _react.useState)([]),
+    var _useState = (0, _react.useState)("login"),
       _useState2 = (0, _slicedToArray.default)(_useState, 2),
-      products = _useState2[0],
-      setProducts = _useState2[1];
-    var _useState3 = (0, _react.useState)(true),
+      mode = _useState2[0],
+      setMode = _useState2[1];
+    var _useState3 = (0, _react.useState)(""),
       _useState4 = (0, _slicedToArray.default)(_useState3, 2),
-      loading = _useState4[0],
-      setLoading = _useState4[1];
+      name = _useState4[0],
+      setName = _useState4[1];
     var _useState5 = (0, _react.useState)(""),
       _useState6 = (0, _slicedToArray.default)(_useState5, 2),
-      error = _useState6[0],
-      setError = _useState6[1];
-    var _useState7 = (0, _react.useState)({}),
+      email = _useState6[0],
+      setEmail = _useState6[1];
+    var _useState7 = (0, _react.useState)(""),
       _useState8 = (0, _slicedToArray.default)(_useState7, 2),
-      cart = _useState8[0],
-      setCart = _useState8[1];
-    var loadProducts = (0, _react.useCallback)(/*#__PURE__*/(0, _asyncToGenerator.default)(function* () {
-      setLoading(true);
-      setError("");
-      try {
-        var res = yield fetch(`${API_BASE}/products?page=1&search=`);
-        var data = yield res.json();
-        setProducts(data.products || []);
-      } catch {
-        setProducts([]);
-        setError("Could not load products. Check backend connection.");
-      } finally {
-        setLoading(false);
-      }
-    }), []);
-    (0, _react.useEffect)(() => {
-      loadProducts();
-    }, [loadProducts]);
-    var addToCart = id => {
-      setCart(prev => ({
-        ...prev,
-        [id]: (prev[id] || 0) + 1
-      }));
-    };
-    var removeFromCart = id => {
-      setCart(prev => {
-        var current = prev[id] || 0;
-        if (current <= 1) {
-          var next = {
-            ...prev
-          };
-          delete next[id];
-          return next;
+      password = _useState8[0],
+      setPassword = _useState8[1];
+    var _useState9 = (0, _react.useState)(""),
+      _useState0 = (0, _slicedToArray.default)(_useState9, 2),
+      token = _useState0[0],
+      setToken = _useState0[1];
+    var _useState1 = (0, _react.useState)(""),
+      _useState10 = (0, _slicedToArray.default)(_useState1, 2),
+      userName = _useState10[0],
+      setUserName = _useState10[1];
+    var _useState11 = (0, _react.useState)([]),
+      _useState12 = (0, _slicedToArray.default)(_useState11, 2),
+      products = _useState12[0],
+      setProducts = _useState12[1];
+    var _useState13 = (0, _react.useState)([]),
+      _useState14 = (0, _slicedToArray.default)(_useState13, 2),
+      cart = _useState14[0],
+      setCart = _useState14[1];
+    var _useState15 = (0, _react.useState)(EMPTY_TOTALS),
+      _useState16 = (0, _slicedToArray.default)(_useState15, 2),
+      totals = _useState16[0],
+      setTotals = _useState16[1];
+    var _useState17 = (0, _react.useState)(false),
+      _useState18 = (0, _slicedToArray.default)(_useState17, 2),
+      loading = _useState18[0],
+      setLoading = _useState18[1];
+    var _useState19 = (0, _react.useState)(""),
+      _useState20 = (0, _slicedToArray.default)(_useState19, 2),
+      message = _useState20[0],
+      setMessage = _useState20[1];
+    var api = (0, _react.useCallback)(/*#__PURE__*/function () {
+      var _ref = (0, _asyncToGenerator.default)(function* (path) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        var res = yield fetch(`${API_BASE}${path}`, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? {
+              Authorization: `Bearer ${token}`
+            } : {}),
+            ...(options.headers || {})
+          }
+        });
+        var data = {};
+        try {
+          data = yield res.json();
+        } catch {}
+        if (!res.ok) {
+          var msg = data.message || `Request failed (${res.status})`;
+          throw new Error(msg);
         }
-        return {
-          ...prev,
-          [id]: current - 1
-        };
+        return data;
       });
-    };
-    var totalItems = (0, _react.useMemo)(() => Object.values(cart).reduce((sum, qty) => sum + qty, 0), [cart]);
-    var subtotal = (0, _react.useMemo)(() => products.reduce((sum, p) => sum + (cart[p._id] || 0) * Number(p.price || 0), 0), [products, cart]);
-    var gst = Number((subtotal * 0.18).toFixed(2));
-    var platformFee = subtotal > 0 ? 49 : 0;
-    var total = Number((subtotal + gst + platformFee).toFixed(2));
-    var renderItem = _ref2 => {
-      var item = _ref2.item;
-      return /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-        style: styles.card,
-        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Image, {
-          source: {
-            uri: item.image
-          },
-          style: styles.image
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }(), [token]);
+    var fetchProducts = (0, _react.useCallback)(/*#__PURE__*/(0, _asyncToGenerator.default)(function* () {
+      var data = yield api("/products?page=1&search=");
+      setProducts(data.products || []);
+    }), [api]);
+    var fetchCart = (0, _react.useCallback)(/*#__PURE__*/(0, _asyncToGenerator.default)(function* () {
+      var data = yield api("/products/cart");
+      setCart(data.cart || []);
+      setTotals(data.totals || EMPTY_TOTALS);
+    }), [api]);
+    (0, _react.useEffect)(() => {
+      if (!token) return;
+      var load = /*#__PURE__*/function () {
+        var _ref4 = (0, _asyncToGenerator.default)(function* () {
+          setLoading(true);
+          setMessage("");
+          try {
+            yield Promise.all([fetchProducts(), fetchCart()]);
+          } catch (err) {
+            setMessage(err.message);
+          } finally {
+            setLoading(false);
+          }
+        });
+        return function load() {
+          return _ref4.apply(this, arguments);
+        };
+      }();
+      load();
+    }, [token, fetchProducts, fetchCart]);
+    var submitAuth = /*#__PURE__*/function () {
+      var _ref5 = (0, _asyncToGenerator.default)(function* () {
+        setLoading(true);
+        setMessage("");
+        try {
+          var endpoint = mode === "login" ? "/auth/login" : "/auth/register";
+          var payload = mode === "login" ? {
+            email,
+            password
+          } : {
+            name,
+            email,
+            password
+          };
+          var data = yield api(endpoint, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          setToken(data.token || "");
+          setUserName(data.name || "");
+          setPassword("");
+        } catch (err) {
+          setMessage(err.message);
+        } finally {
+          setLoading(false);
+        }
+      });
+      return function submitAuth() {
+        return _ref5.apply(this, arguments);
+      };
+    }();
+    var addToCart = /*#__PURE__*/function () {
+      var _ref6 = (0, _asyncToGenerator.default)(function* (id) {
+        setLoading(true);
+        setMessage("");
+        try {
+          var data = yield api(`/products/${id}/cart`, {
+            method: "POST",
+            body: JSON.stringify({
+              quantity: 1
+            })
+          });
+          setCart(data.cart || []);
+          setTotals(data.totals || EMPTY_TOTALS);
+        } catch (err) {
+          setMessage(err.message);
+        } finally {
+          setLoading(false);
+        }
+      });
+      return function addToCart(_x2) {
+        return _ref6.apply(this, arguments);
+      };
+    }();
+    var updateQuantity = /*#__PURE__*/function () {
+      var _ref7 = (0, _asyncToGenerator.default)(function* (id, quantity) {
+        setLoading(true);
+        setMessage("");
+        try {
+          var isDelete = quantity <= 0;
+          var data = yield api(`/products/${id}/cart`, {
+            method: isDelete ? "DELETE" : "PATCH",
+            ...(isDelete ? {} : {
+              body: JSON.stringify({
+                quantity
+              })
+            })
+          });
+          setCart(data.cart || []);
+          setTotals(data.totals || EMPTY_TOTALS);
+        } catch (err) {
+          setMessage(err.message);
+        } finally {
+          setLoading(false);
+        }
+      });
+      return function updateQuantity(_x3, _x4) {
+        return _ref7.apply(this, arguments);
+      };
+    }();
+    var checkout = /*#__PURE__*/function () {
+      var _ref8 = (0, _asyncToGenerator.default)(function* () {
+        setLoading(true);
+        setMessage("");
+        try {
+          var data = yield api("/products/checkout", {
+            method: "POST"
+          });
+          setCart(data.cart || []);
+          setTotals(data.totals || EMPTY_TOTALS);
+          setMessage(data.message || "Checkout successful");
+        } catch (err) {
+          setMessage(err.message);
+        } finally {
+          setLoading(false);
+        }
+      });
+      return function checkout() {
+        return _ref8.apply(this, arguments);
+      };
+    }();
+    var cartMap = (0, _react.useMemo)(() => {
+      var map = {};
+      for (var item of cart) {
+        map[item.product?._id] = item.quantity;
+      }
+      return map;
+    }, [cart]);
+    var totalItems = (0, _react.useMemo)(() => cart.reduce((sum, item) => sum + (item.quantity || 0), 0), [cart]);
+    if (!token) {
+      return /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.SafeAreaView, {
+        style: styles.root,
+        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_expoStatusBar.StatusBar, {
+          style: "dark"
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 96,
-          columnNumber: 7
+          lineNumber: 201,
+          columnNumber: 9
         }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-          style: styles.cardBody,
+          style: styles.authWrap,
           children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            numberOfLines: 2,
-            style: styles.productTitle,
-            children: item.title
+            style: styles.title,
+            children: "MicroMarketplace"
           }, void 0, false, {
             fileName: _jsxFileName,
-            lineNumber: 98,
-            columnNumber: 9
+            lineNumber: 203,
+            columnNumber: 11
           }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.price,
-            children: [RUPEE, item.price]
+            style: styles.subtitle,
+            children: "Login or create account"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 204,
+            columnNumber: 11
+          }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+            style: styles.apiText,
+            children: ["API: ", API_BASE]
           }, void 0, true, {
             fileName: _jsxFileName,
-            lineNumber: 101,
-            columnNumber: 9
-          }, this)]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 97,
-          columnNumber: 7
-        }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-          style: styles.actions,
-          children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
-            onPress: () => removeFromCart(item._id),
-            style: [styles.qtyBtn, styles.qtyBtnLight],
-            children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-              style: styles.qtyBtnText,
-              children: "-"
+            lineNumber: 205,
+            columnNumber: 11
+          }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
+            style: styles.modeRow,
+            children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
+              onPress: () => setMode("login"),
+              style: [styles.modeBtn, mode === "login" && styles.modeBtnActive],
+              children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+                style: [styles.modeBtnText, mode === "login" && styles.modeBtnTextActive],
+                children: "Login"
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 212,
+                columnNumber: 15
+              }, this)
             }, void 0, false, {
               fileName: _jsxFileName,
-              lineNumber: 112,
-              columnNumber: 11
-            }, this)
+              lineNumber: 208,
+              columnNumber: 13
+            }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
+              onPress: () => setMode("register"),
+              style: [styles.modeBtn, mode === "register" && styles.modeBtnActive],
+              children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+                style: [styles.modeBtnText, mode === "register" && styles.modeBtnTextActive],
+                children: "Register"
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 228,
+                columnNumber: 15
+              }, this)
+            }, void 0, false, {
+              fileName: _jsxFileName,
+              lineNumber: 221,
+              columnNumber: 13
+            }, this)]
+          }, void 0, true, {
+            fileName: _jsxFileName,
+            lineNumber: 207,
+            columnNumber: 11
+          }, this), mode === "register" ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.TextInput, {
+            placeholder: "Full name",
+            style: styles.input,
+            value: name,
+            onChangeText: setName
           }, void 0, false, {
             fileName: _jsxFileName,
-            lineNumber: 108,
-            columnNumber: 9
-          }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.qtyValue,
-            children: cart[item._id] || 0
+            lineNumber: 240,
+            columnNumber: 13
+          }, this) : null, /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.TextInput, {
+            placeholder: "Email",
+            style: styles.input,
+            value: email,
+            onChangeText: setEmail,
+            autoCapitalize: "none",
+            keyboardType: "email-address"
           }, void 0, false, {
             fileName: _jsxFileName,
-            lineNumber: 115,
-            columnNumber: 9
+            lineNumber: 247,
+            columnNumber: 11
+          }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.TextInput, {
+            placeholder: "Password",
+            style: styles.input,
+            value: password,
+            onChangeText: setPassword,
+            secureTextEntry: true
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 255,
+            columnNumber: 11
           }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
-            onPress: () => addToCart(item._id),
-            style: [styles.qtyBtn, styles.qtyBtnDark],
+            onPress: submitAuth,
+            style: styles.primaryBtn,
             children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-              style: [styles.qtyBtnText, styles.qtyBtnTextLight],
-              children: "+"
+              style: styles.primaryBtnText,
+              children: mode === "login" ? "Login" : "Create account"
             }, void 0, false, {
               fileName: _jsxFileName,
-              lineNumber: 121,
-              columnNumber: 11
+              lineNumber: 264,
+              columnNumber: 13
             }, this)
           }, void 0, false, {
             fileName: _jsxFileName,
-            lineNumber: 117,
-            columnNumber: 9
-          }, this)]
+            lineNumber: 263,
+            columnNumber: 11
+          }, this), loading ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.ActivityIndicator, {
+            color: "#152238"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 269,
+            columnNumber: 22
+          }, this) : null, message ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+            style: styles.errorText,
+            children: message
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 270,
+            columnNumber: 22
+          }, this) : null]
         }, void 0, true, {
           fileName: _jsxFileName,
-          lineNumber: 107,
-          columnNumber: 7
+          lineNumber: 202,
+          columnNumber: 9
         }, this)]
       }, void 0, true, {
         fileName: _jsxFileName,
-        lineNumber: 95,
-        columnNumber: 5
+        lineNumber: 200,
+        columnNumber: 7
       }, this);
-    };
+    }
     return /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.SafeAreaView, {
       style: styles.root,
       children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_expoStatusBar.StatusBar, {
         style: "dark"
       }, void 0, false, {
         fileName: _jsxFileName,
-        lineNumber: 129,
+        lineNumber: 278,
         columnNumber: 7
       }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
         style: styles.header,
         children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
           children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.heading,
+            style: styles.title,
             children: "MicroMarketplace"
           }, void 0, false, {
             fileName: _jsxFileName,
-            lineNumber: 133,
+            lineNumber: 281,
             columnNumber: 11
           }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.subheading,
-            children: "Fresh picks for your cart"
-          }, void 0, false, {
+            style: styles.subtitle,
+            children: ["Hi, ", userName || "User"]
+          }, void 0, true, {
             fileName: _jsxFileName,
-            lineNumber: 134,
+            lineNumber: 282,
             columnNumber: 11
           }, this)]
         }, void 0, true, {
           fileName: _jsxFileName,
-          lineNumber: 132,
+          lineNumber: 280,
           columnNumber: 9
         }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-          style: styles.cartBadge,
+          style: styles.badge,
           children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.cartBadgeText,
+            style: styles.badgeText,
             children: [totalItems, " items"]
           }, void 0, true, {
             fileName: _jsxFileName,
-            lineNumber: 137,
+            lineNumber: 285,
             columnNumber: 11
           }, this)
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 136,
+          lineNumber: 284,
           columnNumber: 9
         }, this)]
       }, void 0, true, {
         fileName: _jsxFileName,
-        lineNumber: 131,
+        lineNumber: 279,
         columnNumber: 7
-      }, this), loading ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-        style: styles.centered,
-        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.ActivityIndicator, {
-          color: "#ee6c4d",
-          size: "large"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 143,
-          columnNumber: 11
-        }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-          style: styles.helperText,
-          children: "Loading products..."
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 144,
-          columnNumber: 11
-        }, this)]
+      }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+        style: styles.apiText,
+        children: ["API: ", API_BASE]
       }, void 0, true, {
         fileName: _jsxFileName,
-        lineNumber: 142,
-        columnNumber: 9
-      }, this) : error ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
-        style: styles.centered,
-        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-          style: styles.errorText,
-          children: error
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 148,
-          columnNumber: 11
-        }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
-          onPress: loadProducts,
-          style: styles.retryBtn,
-          children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-            style: styles.retryText,
-            children: "Retry"
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 150,
-            columnNumber: 13
-          }, this)
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 149,
-          columnNumber: 11
-        }, this)]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 147,
-        columnNumber: 9
-      }, this) : /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.FlatList, {
-        data: products,
-        keyExtractor: item => item._id,
-        renderItem: renderItem,
-        contentContainerStyle: styles.list,
-        showsVerticalScrollIndicator: false
+        lineNumber: 289,
+        columnNumber: 7
+      }, this), message ? /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+        style: styles.infoText,
+        children: message
       }, void 0, false, {
         fileName: _jsxFileName,
-        lineNumber: 154,
-        columnNumber: 9
+        lineNumber: 291,
+        columnNumber: 18
+      }, this) : null, /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.FlatList, {
+        data: products,
+        keyExtractor: item => item._id,
+        contentContainerStyle: styles.list,
+        renderItem: _ref9 => {
+          var item = _ref9.item;
+          var qty = cartMap[item._id] || 0;
+          return /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
+            style: styles.card,
+            children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Image, {
+              source: {
+                uri: item.image
+              },
+              style: styles.image
+            }, void 0, false, {
+              fileName: _jsxFileName,
+              lineNumber: 301,
+              columnNumber: 15
+            }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+              style: styles.productTitle,
+              children: item.title
+            }, void 0, false, {
+              fileName: _jsxFileName,
+              lineNumber: 302,
+              columnNumber: 15
+            }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+              style: styles.price,
+              children: [RUPEE, item.price]
+            }, void 0, true, {
+              fileName: _jsxFileName,
+              lineNumber: 303,
+              columnNumber: 15
+            }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
+              style: styles.qtyRow,
+              children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
+                onPress: () => updateQuantity(item._id, qty - 1),
+                style: styles.qtyBtn,
+                children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+                  style: styles.qtyBtnText,
+                  children: "-"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 312,
+                  columnNumber: 19
+                }, this)
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 308,
+                columnNumber: 17
+              }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+                style: styles.qtyText,
+                children: qty
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 314,
+                columnNumber: 17
+              }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
+                onPress: () => qty === 0 ? addToCart(item._id) : updateQuantity(item._id, qty + 1),
+                style: [styles.qtyBtn, styles.qtyBtnPrimary],
+                children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+                  style: [styles.qtyBtnText, styles.qtyBtnTextPrimary],
+                  children: "+"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 323,
+                  columnNumber: 19
+                }, this)
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 315,
+                columnNumber: 17
+              }, this)]
+            }, void 0, true, {
+              fileName: _jsxFileName,
+              lineNumber: 307,
+              columnNumber: 15
+            }, this)]
+          }, void 0, true, {
+            fileName: _jsxFileName,
+            lineNumber: 300,
+            columnNumber: 13
+          }, this);
+        }
+      }, void 0, false, {
+        fileName: _jsxFileName,
+        lineNumber: 293,
+        columnNumber: 7
       }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
         style: styles.billPanel,
-        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
-          style: styles.billTitle,
-          children: "Billing Summary"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 164,
-          columnNumber: 9
-        }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(Row, {
+        children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(Row, {
           label: "Subtotal",
-          value: subtotal
+          value: totals.subtotal || 0
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 165,
+          lineNumber: 334,
           columnNumber: 9
         }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(Row, {
           label: "GST (18%)",
-          value: gst
+          value: totals.gst || 0
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 166,
+          lineNumber: 335,
           columnNumber: 9
         }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(Row, {
           label: "Platform Fee",
-          value: platformFee
+          value: totals.platformFee || 0
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 167,
+          lineNumber: 336,
           columnNumber: 9
         }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(Row, {
           label: "Total",
-          value: total,
+          value: totals.total || 0,
           bold: true
         }, void 0, false, {
           fileName: _jsxFileName,
-          lineNumber: 168,
+          lineNumber: 337,
+          columnNumber: 9
+        }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Pressable, {
+          onPress: checkout,
+          style: styles.checkoutBtn,
+          children: /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
+            style: styles.checkoutText,
+            children: "Checkout"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 339,
+            columnNumber: 11
+          }, this)
+        }, void 0, false, {
+          fileName: _jsxFileName,
+          lineNumber: 338,
           columnNumber: 9
         }, this)]
       }, void 0, true, {
         fileName: _jsxFileName,
-        lineNumber: 163,
+        lineNumber: 333,
         columnNumber: 7
       }, this)]
     }, void 0, true, {
       fileName: _jsxFileName,
-      lineNumber: 128,
+      lineNumber: 277,
       columnNumber: 5
     }, this);
   }
-  _s(App, "b0vlWQpEWifeVet4OZ0YrOjlAzs=");
+  _s(App, "2LObnArmEsWOQz1fmRgdV3MjFzg=");
   _c = App;
-  function Row(_ref3) {
-    var label = _ref3.label,
-      value = _ref3.value,
-      bold = _ref3.bold;
+  function Row(_ref0) {
+    var label = _ref0.label,
+      value = _ref0.value,
+      bold = _ref0.bold;
     return /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.View, {
       style: styles.row,
       children: [/*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
@@ -106908,19 +107168,19 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
         children: label
       }, void 0, false, {
         fileName: _jsxFileName,
-        lineNumber: 177,
+        lineNumber: 349,
         columnNumber: 7
       }, this), /*#__PURE__*/(0, _reactJsxDevRuntime.jsxDEV)(_reactNative.Text, {
         style: [styles.rowValue, bold && styles.bold],
-        children: [RUPEE, value]
+        children: [RUPEE, Number(value).toFixed(2)]
       }, void 0, true, {
         fileName: _jsxFileName,
-        lineNumber: 178,
+        lineNumber: 350,
         columnNumber: 7
       }, this)]
     }, void 0, true, {
       fileName: _jsxFileName,
-      lineNumber: 176,
+      lineNumber: 348,
       columnNumber: 5
     }, this);
   }
@@ -106930,32 +107190,92 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
       flex: 1,
       backgroundColor: "#f7f8fa"
     },
+    authWrap: {
+      padding: 16,
+      paddingTop: 30
+    },
     header: {
       paddingHorizontal: 16,
-      paddingTop: 8,
-      paddingBottom: 12,
+      paddingVertical: 10,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center"
     },
-    heading: {
-      fontSize: 24,
+    title: {
+      fontSize: 22,
       fontWeight: "800",
       color: "#152238"
     },
-    subheading: {
-      marginTop: 2,
-      fontSize: 13,
-      color: "#5f6f86"
+    subtitle: {
+      color: "#64748b",
+      marginTop: 2
     },
-    cartBadge: {
-      backgroundColor: "#152238",
+    apiText: {
+      color: "#64748b",
+      fontSize: 12,
+      paddingHorizontal: 16,
+      marginBottom: 8
+    },
+    modeRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginVertical: 12
+    },
+    modeBtn: {
+      borderWidth: 1,
+      borderColor: "#cbd5e1",
       borderRadius: 999,
-      paddingHorizontal: 12,
+      paddingHorizontal: 14,
       paddingVertical: 8
     },
-    cartBadgeText: {
-      color: "#ffffff",
+    modeBtnActive: {
+      backgroundColor: "#152238",
+      borderColor: "#152238"
+    },
+    modeBtnText: {
+      color: "#334155",
+      fontWeight: "700"
+    },
+    modeBtnTextActive: {
+      color: "#ffffff"
+    },
+    input: {
+      backgroundColor: "#ffffff",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#dbe1ea",
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      marginBottom: 10
+    },
+    primaryBtn: {
+      backgroundColor: "#1f7a8c",
+      borderRadius: 10,
+      alignItems: "center",
+      paddingVertical: 12,
+      marginBottom: 12
+    },
+    primaryBtnText: {
+      color: "#fff",
+      fontWeight: "800"
+    },
+    errorText: {
+      color: "#b91c1c",
+      marginTop: 8
+    },
+    infoText: {
+      color: "#b91c1c",
+      paddingHorizontal: 16,
+      marginBottom: 8
+    },
+    badge: {
+      backgroundColor: "#152238",
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 7
+    },
+    badgeText: {
+      color: "#fff",
       fontWeight: "700",
       fontSize: 12
     },
@@ -106964,43 +107284,31 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
       paddingBottom: 210
     },
     card: {
-      backgroundColor: "#ffffff",
-      borderRadius: 18,
-      marginBottom: 14,
-      overflow: "hidden",
-      shadowColor: "#0e1528",
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      shadowOffset: {
-        width: 0,
-        height: 6
-      },
-      elevation: 4
+      backgroundColor: "#fff",
+      borderRadius: 14,
+      padding: 10,
+      marginBottom: 10
     },
     image: {
       width: "100%",
-      height: 170,
-      backgroundColor: "#edf1f7"
-    },
-    cardBody: {
-      paddingHorizontal: 12,
-      paddingTop: 10
+      height: 145,
+      borderRadius: 10,
+      backgroundColor: "#edf2f7"
     },
     productTitle: {
-      fontSize: 15,
+      marginTop: 8,
+      color: "#1e293b",
       fontWeight: "700",
-      color: "#1d2a44"
+      fontSize: 15
     },
     price: {
-      marginTop: 6,
-      marginBottom: 10,
-      fontSize: 16,
+      marginTop: 4,
+      color: "#ee6c4d",
       fontWeight: "800",
-      color: "#ee6c4d"
+      fontSize: 15
     },
-    actions: {
-      paddingHorizontal: 12,
-      paddingBottom: 12,
+    qtyRow: {
+      marginTop: 8,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "flex-end",
@@ -107009,101 +107317,83 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
     qtyBtn: {
       width: 34,
       height: 34,
-      borderRadius: 10,
+      borderRadius: 9,
       alignItems: "center",
-      justifyContent: "center"
+      justifyContent: "center",
+      backgroundColor: "#e2e8f0"
     },
-    qtyBtnLight: {
-      backgroundColor: "#e8ecf4"
-    },
-    qtyBtnDark: {
+    qtyBtnPrimary: {
       backgroundColor: "#1f7a8c"
     },
     qtyBtnText: {
-      fontSize: 19,
-      fontWeight: "800",
-      color: "#1c2940",
-      lineHeight: 21
+      fontSize: 20,
+      fontWeight: "700",
+      color: "#0f172a",
+      lineHeight: 22
     },
-    qtyBtnTextLight: {
-      color: "#ffffff"
+    qtyBtnTextPrimary: {
+      color: "#fff"
     },
-    qtyValue: {
-      minWidth: 18,
+    qtyText: {
+      minWidth: 20,
       textAlign: "center",
       fontWeight: "700",
-      color: "#2b3d5b"
+      color: "#0f172a"
     },
     billPanel: {
       position: "absolute",
       left: 12,
       right: 12,
       bottom: 12,
-      backgroundColor: "#ffffff",
-      borderRadius: 16,
-      padding: 14,
-      shadowColor: "#000000",
-      shadowOpacity: 0.12,
-      shadowRadius: 12,
-      shadowOffset: {
-        width: 0,
-        height: 4
-      },
-      elevation: 8
-    },
-    billTitle: {
-      fontWeight: "800",
-      fontSize: 16,
-      color: "#152238",
-      marginBottom: 8
+      backgroundColor: "#fff",
+      borderRadius: 14,
+      padding: 12
     },
     row: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginVertical: 3
+      marginVertical: 2
     },
     rowLabel: {
-      color: "#5f6f86",
-      fontSize: 13
+      color: "#64748b"
     },
     rowValue: {
-      color: "#1d2a44",
-      fontSize: 13
+      color: "#0f172a"
     },
     bold: {
-      fontWeight: "800",
-      fontSize: 14
+      fontWeight: "800"
     },
-    centered: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingHorizontal: 28
-    },
-    helperText: {
-      marginTop: 10,
-      color: "#5f6f86"
-    },
-    errorText: {
-      color: "#aa2e25",
-      textAlign: "center",
-      marginBottom: 12
-    },
-    retryBtn: {
+    checkoutBtn: {
+      marginTop: 8,
       backgroundColor: "#152238",
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 10
+      borderRadius: 10,
+      alignItems: "center",
+      paddingVertical: 11
     },
-    retryText: {
-      color: "#ffffff",
-      fontWeight: "700"
+    checkoutText: {
+      color: "#fff",
+      fontWeight: "800"
     }
   });
   var _c, _c2;
   $RefreshReg$(_c, "App");
   $RefreshReg$(_c2, "Row");
-},680,[67,38,681,662,116,76,170],"App.js");
+},680,[67,38,681,682,662,116,76,170],"App.js");
+__d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+  Object.defineProperty(exports, "env", {
+    enumerable: true,
+    get: function () {
+      return env;
+    }
+  });
+  // virtual module for client environment variables in development.
+  var env = process.env;
+},681,[],"node_modules/expo/virtual/env.js");
 __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
@@ -107166,7 +107456,7 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
   });
   var _NativeStatusBarWrapper = require(_dependencyMap[0], "./NativeStatusBarWrapper");
   var _types = require(_dependencyMap[1], "./types");
-},681,[682,683],"node_modules/expo-status-bar/src/StatusBar.ts");
+},682,[683,684],"node_modules/expo-status-bar/src/StatusBar.ts");
 __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
@@ -107298,10 +107588,10 @@ __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, expor
     }
     return resolvedStyle === 'light' ? 'light-content' : 'dark-content';
   }
-},682,[78,116,76,170],"node_modules/expo-status-bar/src/NativeStatusBarWrapper.tsx");
+},683,[78,116,76,170],"node_modules/expo-status-bar/src/NativeStatusBarWrapper.tsx");
 __d(function (global, require, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
-},683,[],"node_modules/expo-status-bar/src/types.ts");
+},684,[],"node_modules/expo-status-bar/src/types.ts");
 __r(212);
 __r(3);
 __r(0);
