@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "MicroMarketplace",
+    "slug": "micro-marketplace-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#fff5e8"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
